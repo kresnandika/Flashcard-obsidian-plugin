@@ -7,7 +7,8 @@ Your cards, progress and media live as plain files in your vault, so they sync w
 ## Features
 
 - **Anki import.** Reads every package format Anki has written (`collection.anki2`, `collection.anki21`, and the zstd-compressed `collection.anki21b`), plus `.colpkg` collection backups. Deck hierarchy, note types, templates, CSS, audio and images come along. Importing a deck again updates its notes and keeps your progress.
-- **Faithful cards.** Templates are rendered like Anki: fields, sections, `{{FrontSide}}`, `hint`, `type`, `cloze`, `furigana`, `[sound:…]` replay buttons, and night mode. Deck JavaScript (typing boxes, drawing pads) runs inside a sandboxed frame that can't reach your vault.
+- **Two card styles.** The *Flashcards layout* redraws every card from its note's fields in your theme's colours, like a dictionary entry (word, reading, meaning, example, picture, audio), with typing and a writing pad where the deck asked for them. *Deck design* keeps the deck's own Anki templates. Switch globally in settings or per note type from the review menu, and correct the detected fields under **Card fields…**.
+- **Faithful deck design.** Templates are rendered like Anki: fields, sections, `{{FrontSide}}`, `hint`, `type`, `cloze`, `furigana`, `[sound:…]` replay buttons, and night mode. Deck JavaScript (typing boxes, drawing pads) runs inside a sandboxed frame that can't reach your vault.
 - **FSRS scheduling.** Learning steps, desired retention, maximum interval, fuzz and custom weights, with the next interval shown on every answer button.
 - **Anki-style study.** Daily new and review limits (global or per deck), sibling burying, new-card gather order, learn-ahead, undo, bury and suspend.
 - **Keyboard first.** Space reveals, 1–4 answer, R replays audio, U undoes.
@@ -88,7 +89,8 @@ Under **Settings → Flashcards → Daily note**, point the plugin at a note (`J
 | | Learning / relearning steps | `1m 10m` / `10m` |
 | | Fuzz intervals | On |
 | | FSRS weights | Library defaults |
-| Reviewing | Autoplay audio, run deck scripts, follow theme, show intervals, status bar | On |
+| Reviewing | Card style | Flashcards layout |
+| | Autoplay audio, run deck scripts, follow theme, show intervals, status bar | On |
 | Daily note | Mark the daily note, note path, property | Off |
 
 ## Your data

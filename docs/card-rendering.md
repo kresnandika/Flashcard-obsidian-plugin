@@ -1,5 +1,19 @@
 # Card rendering
 
+## Two card styles
+
+**Flashcards layout** (default) ignores the deck's templates and draws the card itself (`rendering/layout/`):
+
+1. `fieldRoles.ts` works out what each note field is (word, reading, meaning, part of speech, example, example reading/translation, image, word/example audio) from field names, then contents (`[sound:]` → audio, `<img>` → image). Users correct it per note type with **Card fields…** (stored in `settings.noteTypeLayouts[noteTypeId].roles`).
+2. `cardKind.ts` reads the deck's front template to keep its intent: does it show the word (recognition) or the meaning (production), and did it expect typing (`{{type:}}`, a text box) or drawing (a canvas)? Scripts and comments are ignored, since they often mention fields without showing them.
+3. `builtinLayout.ts` renders a dictionary entry: headword with reading in red and audio, part of speech and meaning, then a ruled-off example, picture and audio. Production cards with typing get a character diff against the word; recognition answers are shown for self-grading; drawing cards get a practice-grid writing pad whose drawing is shown again on the back. Colours and font come from the active Obsidian theme as CSS variables.
+
+A note type falls back to its deck design when no word or meaning field can be found, or when the user picks **Use the deck's own design** for it.
+
+**Deck design** renders the deck's Anki templates as described below.
+
+## Deck design
+
 A card is shown in four steps:
 
 1. **Template** (`rendering/templateEngine.ts`). The note type's front or back template is rendered with the note's fields.
