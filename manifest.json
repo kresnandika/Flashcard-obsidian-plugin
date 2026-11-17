@@ -1,0 +1,10 @@
+{
+  "id": "flashcard-srs",
+  "name": "Flashcards",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Spaced-repetition flashcards. Imports Anki decks (.apkg) with their templates, audio and images, and schedules reviews with FSRS.",
+  "author": "Kresna Andika",
+  "authorUrl": "https://github.com/kresnandika",
+  "isDesktopOnly": false
+}

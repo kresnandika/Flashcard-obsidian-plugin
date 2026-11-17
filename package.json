@@ -1,0 +1,38 @@
+{
+  "name": "obsidian-flashcards",
+  "version": "0.1.0",
+  "description": "Spaced-repetition flashcards for Obsidian. Imports Anki decks (.apkg) with their templates, audio and images, and schedules reviews with FSRS.",
+  "main": "main.js",
+  "private": true,
+  "license": "MIT",
+  "author": "Kresna Andika",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc --noEmit && node esbuild.config.mjs production",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src tests",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run typecheck && npm run lint && npm test",
+    "version": "node scripts/version-bump.mjs && git add manifest.json versions.json"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.6",
+    "@types/sql.js": "^1.4.11",
+    "builtin-modules": "^5.5.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.15.0",
+    "obsidian": "^1.14.4",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.73.0",
+    "vitest": "^5.1.0"
+  },
+  "dependencies": {
+    "fzstd": "^0.1.1",
+    "jszip": "^3.10.2",
+    "sql.js": "^1.16.0",
+    "ts-fsrs": "^5.4.2"
+  },
+  "type": "module"
+}
