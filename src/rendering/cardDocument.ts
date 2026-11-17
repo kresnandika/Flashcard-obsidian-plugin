@@ -2,9 +2,15 @@ import { BASE_CARD_CSS } from "./baseStyles";
 import { bridgeScript } from "./bridgeScript";
 import { rewriteMediaUrls, type MediaResolver } from "./media";
 
+/** Colours and font of the surrounding Obsidian theme, handed to the card document as CSS variables. */
 export interface CardTheme {
 	dark: boolean;
 	textColor: string;
+	ground: string;
+	muted: string;
+	faint: string;
+	accent: string;
+	font: string;
 }
 
 export interface CardDocumentOptions {
@@ -27,7 +33,12 @@ export function buildCardDocument(options: CardDocumentOptions): string {
 	const css = rewriteMediaUrls(options.css, options.resolveMedia);
 	const nightBody = options.theme.dark ? " nightMode night_mode" : "";
 	const nightHtml = options.theme.dark ? ' class="night-mode"' : "";
-	const vars = `:root{--fc-scheme:${options.theme.dark ? "dark" : "light"};--fc-text:${cssValue(options.theme.textColor)};}`;
+	const { theme } = options;
+	const vars =
+		`:root{--fc-scheme:${theme.dark ? "dark" : "light"};--fc-text:${cssValue(theme.textColor)};` +
+		`--fc-ink:${cssValue(theme.textColor)};--fc-ground:${cssValue(theme.ground)};--fc-muted:${cssValue(theme.muted)};` +
+		`--fc-faint:${cssValue(theme.faint)};--fc-red:${cssValue(theme.accent)};--fc-font:${cssValue(theme.font)};` +
+		`--fc-rule:color-mix(in srgb,var(--fc-ink) 14%,transparent);--fc-rule-strong:color-mix(in srgb,var(--fc-ink) 26%,transparent);}`;
 	const bridge = bridgeScript({ token: options.token, storage: options.storage, focusEditable: options.focusEditable });
 
 	return `<!doctype html>

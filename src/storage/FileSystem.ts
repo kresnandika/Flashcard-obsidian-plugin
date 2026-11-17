@@ -5,6 +5,7 @@
 export interface FileSystem {
 	exists(path: string): Promise<boolean>;
 	readText(path: string): Promise<string>;
+	readBinary(path: string): Promise<Uint8Array>;
 	writeText(path: string, text: string): Promise<void>;
 	writeBinary(path: string, data: Uint8Array): Promise<void>;
 	/** Creates the folder and any missing parents. */

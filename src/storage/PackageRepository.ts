@@ -186,9 +186,19 @@ export class PackageRepository {
 
 	/** URL of a media file referenced by a card, or null when the name is empty. */
 	mediaUrl(pkg: LoadedPackage, name: string): string | null {
+		return name ? this.fs.resourceUrl(this.mediaPath(pkg, name)) : null;
+	}
+
+	/** Bytes of a media file, or null when the deck doesn't have it. */
+	async readMedia(pkg: LoadedPackage, name: string): Promise<Uint8Array | null> {
 		if (!name) return null;
-		const stored = pkg.data.renamedMedia[name] ?? safeMediaName(name);
-		return this.fs.resourceUrl(joinPath(pkg.folder, MEDIA_FOLDER, stored));
+		const path = this.mediaPath(pkg, name);
+		if (!(await this.fs.exists(path))) return null;
+		return this.fs.readBinary(path);
+	}
+
+	private mediaPath(pkg: LoadedPackage, name: string): string {
+		return joinPath(pkg.folder, MEDIA_FOLDER, pkg.data.renamedMedia[name] ?? safeMediaName(name));
 	}
 
 	private findMatchingPackage(parsed: ParsedPackage): LoadedPackage | undefined {

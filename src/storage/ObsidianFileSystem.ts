@@ -13,6 +13,10 @@ export class ObsidianFileSystem implements FileSystem {
 		return this.adapter.read(normalizePath(path));
 	}
 
+	async readBinary(path: string): Promise<Uint8Array> {
+		return new Uint8Array(await this.adapter.readBinary(normalizePath(path)));
+	}
+
 	writeText(path: string, text: string): Promise<void> {
 		return this.adapter.write(normalizePath(path), text);
 	}

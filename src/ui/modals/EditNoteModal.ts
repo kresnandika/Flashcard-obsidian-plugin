@@ -12,6 +12,7 @@ export class EditNoteModal extends Modal {
 	}
 
 	override onOpen(): void {
+		this.modalEl.addClass("fc-modal");
 		const { contentEl, ref } = this;
 		this.titleEl.setText(`Edit note · ${ref.noteType.name}`);
 		contentEl.addClass("fc-edit-note");

@@ -48,6 +48,54 @@ export function rewriteMediaUrls(html: string, resolve: MediaResolver): string {
 		});
 }
 
+/** Every relative media name referenced by `src` attributes or CSS `url()`s, in all its spellings. */
+export function collectMediaReferences(html: string): string[] {
+	const names = new Set<string>();
+	rewriteMediaUrls(html, (name) => {
+		names.add(name);
+		return null;
+	});
+	return [...names];
+}
+
+const MIME_TYPES: Record<string, string> = {
+	jpg: "image/jpeg",
+	jpeg: "image/jpeg",
+	png: "image/png",
+	gif: "image/gif",
+	webp: "image/webp",
+	svg: "image/svg+xml",
+	avif: "image/avif",
+	bmp: "image/bmp",
+	ttf: "font/ttf",
+	otf: "font/otf",
+	woff: "font/woff",
+	woff2: "font/woff2",
+	mp3: "audio/mpeg",
+	ogg: "audio/ogg",
+	wav: "audio/wav",
+	m4a: "audio/mp4",
+	mp4: "video/mp4",
+	webm: "video/webm",
+};
+
+export function mimeType(name: string): string {
+	const extension = name.slice(name.lastIndexOf(".") + 1).toLowerCase();
+	return MIME_TYPES[extension] ?? "application/octet-stream";
+}
+
+/**
+ * Encodes a media file as a data: URI. Card frames are sandboxed with an
+ * opaque origin, which can't load the vault's app:// or capacitor:// URLs,
+ * so images and fonts are handed to them inline.
+ */
+export function toDataUri(bytes: Uint8Array, name: string): string {
+	let binary = "";
+	const chunk = 0x8000;
+	for (let i = 0; i < bytes.length; i += chunk) binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+	return `data:${mimeType(name)};base64,${btoa(binary)}`;
+}
+
 function resolveRelative(value: string, resolve: MediaResolver): string | null {
 	const trimmed = value.trim();
 	if (trimmed === "" || /^([a-z][a-z0-9+.-]*:|\/\/|#|\/)/i.test(trimmed)) return null;

@@ -18,6 +18,7 @@ export class ImportModal extends Modal {
 	}
 
 	override onOpen(): void {
+		this.modalEl.addClass("fc-modal");
 		this.titleEl.setText("Import Anki deck");
 		const { contentEl } = this;
 		contentEl.addClass("fc-import");

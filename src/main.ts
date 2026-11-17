@@ -14,6 +14,7 @@ import { FlashcardsSettingTab } from "./settings/SettingsTab";
 import { ObsidianFileSystem } from "./storage/ObsidianFileSystem";
 import { PackageRepository, type ImportProgress, type ImportReport } from "./storage/PackageRepository";
 import { AudioPlayer } from "./ui/components/AudioPlayer";
+import { MediaInliner } from "./ui/components/MediaInliner";
 import type { PluginContext } from "./ui/context";
 import { FlashcardsView } from "./ui/FlashcardsView";
 import { DeckSuggestModal } from "./ui/modals/DeckSuggestModal";
@@ -28,6 +29,7 @@ export default class FlashcardsPlugin extends Plugin implements PluginContext {
 	declare settings: FlashcardsSettings;
 	repository!: PackageRepository;
 	readonly audio = new AudioPlayer();
+	media!: MediaInliner;
 	api!: FlashcardsApi;
 	private cachedScheduler: Scheduler | null = null;
 	private statusBarEl: HTMLElement | null = null;
@@ -35,6 +37,7 @@ export default class FlashcardsPlugin extends Plugin implements PluginContext {
 	override async onload(): Promise<void> {
 		this.settings = resolveSettings(await this.loadData());
 		this.repository = new PackageRepository(new ObsidianFileSystem(this.app.vault.adapter), () => this.settings.dataFolder);
+		this.media = new MediaInliner(this.repository);
 		this.api = createApi(
 			() => this.repository.collection,
 			() => this.settings,
@@ -57,6 +60,7 @@ export default class FlashcardsPlugin extends Plugin implements PluginContext {
 	override onunload(): void {
 		this.repository.flush();
 		this.audio.stop();
+		this.media.clear();
 	}
 
 	// ── PluginContext ────────────────────────────────────────────────────

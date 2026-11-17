@@ -3,6 +3,7 @@ import type { Scheduler } from "../scheduling/Scheduler";
 import type { FlashcardsSettings } from "../settings/settings";
 import type { PackageRepository } from "../storage/PackageRepository";
 import type { AudioPlayer } from "./components/AudioPlayer";
+import type { MediaInliner } from "./components/MediaInliner";
 
 /**
  * Everything the views need from the plugin. Views depend on this interface
@@ -13,6 +14,7 @@ export interface PluginContext {
 	readonly settings: FlashcardsSettings;
 	readonly repository: PackageRepository;
 	readonly audio: AudioPlayer;
+	readonly media: MediaInliner;
 	scheduler(): Scheduler;
 	saveSettings(): Promise<void>;
 	/** Re-renders every open view and the status bar after data changed. */

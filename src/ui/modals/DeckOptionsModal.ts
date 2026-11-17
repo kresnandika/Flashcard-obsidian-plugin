@@ -13,6 +13,7 @@ export class DeckOptionsModal extends Modal {
 	}
 
 	override onOpen(): void {
+		this.modalEl.addClass("fc-modal");
 		const { contentEl, settings, deckName } = this;
 		this.titleEl.setText(`Options · ${deckName.split("::").pop() ?? deckName}`);
 		const draft: Partial<DeckLimits> = { ...settings.deckLimits[deckName] };

@@ -16,6 +16,12 @@ export class MemoryFileSystem implements FileSystem {
 		return value;
 	}
 
+	async readBinary(path: string): Promise<Uint8Array> {
+		const value = this.files.get(path);
+		if (!(value instanceof Uint8Array)) throw new Error(`No binary file at ${path}`);
+		return value;
+	}
+
 	async writeText(path: string, text: string): Promise<void> {
 		this.files.set(path, text);
 		this.writes.push(path);

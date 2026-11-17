@@ -1,5 +1,5 @@
 import { PluginSettingTab, Setting, type App, type Plugin } from "obsidian";
-import { DEFAULT_SETTINGS, parseSteps, type FlashcardsSettings, type NewCardGather, type NewCardMix } from "./settings";
+import { DEFAULT_SETTINGS, parseSteps, type CardStyle, type FlashcardsSettings, type NewCardGather, type NewCardMix } from "./settings";
 
 export interface SettingsHost {
 	readonly settings: FlashcardsSettings;
@@ -125,6 +125,19 @@ export class FlashcardsSettingTab extends PluginSettingTab {
 	private displaySection(el: HTMLElement): void {
 		const { settings } = this.host;
 		new Setting(el).setName("Reviewing").setHeading();
+		new Setting(el)
+			.setName("Card style")
+			.setDesc("Flashcards: cards drawn with this plugin's layout in your theme's colours, from the note's fields. Deck design: the deck's own Anki templates. Switch a single note type from the review screen's menu.")
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOption("flashcards", "Flashcards layout")
+					.addOption("deck", "Deck design")
+					.setValue(settings.cardStyle)
+					.onChange(async (value) => {
+						settings.cardStyle = value as CardStyle;
+						await this.host.saveSettings();
+					}),
+			);
 		this.toggle(el, "Play audio automatically", "Play a side's audio when it's shown. R replays it.", () => settings.autoplayAudio, (v) => (settings.autoplayAudio = v));
 		this.toggle(el, "Run deck scripts", "Let card templates run their JavaScript (typing boxes, drawing pads…). Cards run in a sandbox without access to your vault.", () => settings.runDeckScripts, (v) => (settings.runDeckScripts = v));
 		this.toggle(el, "Follow Obsidian's theme", "Render cards in night mode when Obsidian uses a dark theme.", () => settings.followObsidianTheme, (v) => (settings.followObsidianTheme = v));

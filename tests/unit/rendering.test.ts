@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildCardDocument, stripScripts } from "../../src/rendering/cardDocument";
-import { extractSounds, rewriteMediaUrls } from "../../src/rendering/media";
+import { collectMediaReferences, extractSounds, mimeType, rewriteMediaUrls, toDataUri } from "../../src/rendering/media";
 import { renderTypeComparison } from "../../src/rendering/typeAnswer";
 
 describe("extractSounds", () => {
@@ -34,7 +34,7 @@ describe("buildCardDocument", () => {
 		html: '<div onclick="x()">hi</div><script>alert(1)</script>',
 		css: ".card { color: red }",
 		ord: 1,
-		theme: { dark: true, textColor: "#ddd" },
+		theme: { dark: true, textColor: "#ddd", ground: "#1e1e1e", muted: "#aaa", faint: "#777", accent: "#d4604f", font: "system-ui" },
 		resolveMedia: () => null,
 		token: "t",
 		storage: {},
@@ -65,5 +65,20 @@ describe("renderTypeComparison", () => {
 		const html = renderTypeComparison("nihoa", "nihao");
 		expect(html).toContain('class="typeGood">nih<');
 		expect(html).toContain("&darr;");
+	});
+});
+
+describe("media inlining helpers", () => {
+	it("collects every relative reference from HTML and CSS", () => {
+		const refs = collectMediaReferences('<img src="a.jpg"><img src="https://x/y.png"><style>@font-face{src:url(f.ttf)}</style>');
+		expect(refs).toContain("a.jpg");
+		expect(refs).toContain("f.ttf");
+		expect(refs.some((ref) => ref.startsWith("https"))).toBe(false);
+	});
+
+	it("encodes bytes as a data URI with the right type", () => {
+		expect(mimeType("photo.JPEG")).toBe("image/jpeg");
+		expect(mimeType("noext")).toBe("application/octet-stream");
+		expect(toDataUri(new Uint8Array([104, 105]), "a.png")).toBe("data:image/png;base64,aGk=");
 	});
 });

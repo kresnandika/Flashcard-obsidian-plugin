@@ -1,6 +1,16 @@
 /** Plugin settings, persisted by Obsidian in the plugin's data.json. */
 
+import type { FieldRole } from "../rendering/layout/fieldRoles";
+
 export type NewCardGather = "deck" | "position";
+/** "flashcards" draws cards with the plugin's own layout; "deck" uses the deck's Anki templates. */
+export type CardStyle = "flashcards" | "deck";
+
+/** Per note type: its card style and corrections to the detected field roles. */
+export interface NoteTypeLayout {
+	style?: CardStyle;
+	roles?: Partial<Record<FieldRole, number | null>>;
+}
 export type NewCardMix = "mixed" | "before-reviews" | "after-reviews";
 
 /** Limits that can be overridden per deck. */
@@ -34,6 +44,8 @@ export interface FlashcardsSettings {
 	/** Learning cards due within this many minutes are shown early when nothing else is left. */
 	learnAheadMinutes: number;
 	scheduler: SchedulerSettings;
+	cardStyle: CardStyle;
+	noteTypeLayouts: Record<string, NoteTypeLayout>;
 	autoplayAudio: boolean;
 	runDeckScripts: boolean;
 	followObsidianTheme: boolean;
@@ -67,6 +79,8 @@ export const DEFAULT_SETTINGS: FlashcardsSettings = {
 		relearningSteps: ["10m"],
 		weights: [],
 	},
+	cardStyle: "flashcards",
+	noteTypeLayouts: {},
 	autoplayAudio: true,
 	runDeckScripts: true,
 	followObsidianTheme: true,
@@ -84,6 +98,7 @@ export function resolveSettings(stored: unknown): FlashcardsSettings {
 		...raw,
 		limits: { ...DEFAULT_SETTINGS.limits, ...raw.limits },
 		deckLimits: { ...raw.deckLimits },
+		noteTypeLayouts: { ...raw.noteTypeLayouts },
 		scheduler: { ...DEFAULT_SETTINGS.scheduler, ...raw.scheduler },
 		dailyNote: { ...DEFAULT_SETTINGS.dailyNote, ...raw.dailyNote },
 		collapsedDecks: [...(raw.collapsedDecks ?? [])],

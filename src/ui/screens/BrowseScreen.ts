@@ -5,6 +5,7 @@ import { renderBack, renderFront } from "../../rendering/renderCard";
 import { stripHtml } from "../../utils/strings";
 import { formatInterval } from "../../utils/time";
 import { CardFrame } from "../components/CardFrame";
+import { headword } from "../components/guideWords";
 import { presentSide, soundUrls } from "../components/cardPresenter";
 import type { PluginContext } from "../context";
 import { confirm } from "../modals/ConfirmModal";
@@ -60,7 +61,7 @@ export class BrowseScreen implements Screen {
 
 	private renderToolbar(parent: HTMLElement): void {
 		const bar = parent.createDiv({ cls: "fc-browse-toolbar" });
-		const back = bar.createDiv({ cls: "clickable-icon", attr: { "aria-label": "Back to decks" } });
+		const back = bar.createEl("button", { cls: "clickable-icon fc-icon-button", attr: { "aria-label": "Back to decks" } });
 		setIcon(back, "arrow-left");
 		back.addEventListener("click", () => this.nav.home());
 
@@ -120,7 +121,12 @@ export class BrowseScreen implements Screen {
 		if (!list) return;
 		list.empty();
 		const cards = this.filteredCards();
-		list.createDiv({ cls: "fc-browse-count", text: `${cards.length} cards` });
+		const count = list.createDiv({ cls: "fc-browse-count", text: `${cards.length} cards` });
+		if (cards.length > 1) {
+			const first = headword(cards[0]);
+			const last = headword(cards[cards.length - 1]);
+			count.createSpan({ cls: "fc-browse-guide", text: ` · ${first.text} — ${last.text}` });
+		}
 
 		const { collection } = this.ctx.repository;
 		for (const ref of cards.slice(0, this.limit)) {
@@ -128,8 +134,13 @@ export class BrowseScreen implements Screen {
 			if (ref.key === this.selectedKey) row.addClass("is-selected");
 			const progress = collection.progress(ref);
 			if (progress.suspended) row.addClass("is-suspended");
-			row.createDiv({ cls: "fc-browse-title", text: stripHtml(ref.note.fields[ref.noteType.sortField] ?? "") || "(empty)" });
-			row.createDiv({ cls: "fc-browse-sub", text: `${ref.template.name} · ${ref.deckName.split("::").pop() ?? ""} · ${this.dueText(ref)}` });
+			const word = headword(ref);
+			const title = row.createDiv({ cls: "fc-browse-title" });
+			title.createSpan({ cls: "fc-headword-text", text: word.text });
+			if (word.reading) title.createSpan({ cls: "fc-headword-reading", text: word.reading });
+			const deck = ref.deckName.split("::").pop() ?? "";
+			const where = deck.toLowerCase().startsWith(ref.template.name.toLowerCase()) ? deck : `${ref.template.name} · ${deck}`;
+			row.createDiv({ cls: "fc-browse-sub", text: `${where} · ${this.dueText(ref)}` });
 			row.addEventListener("click", () => {
 				this.selectedKey = ref.key;
 				this.previewSide = "front";
@@ -161,8 +172,9 @@ export class BrowseScreen implements Screen {
 
 		const tabs = detail.createDiv({ cls: "fc-browse-tabs" });
 		for (const side of ["front", "back"] as const) {
-			const tab = tabs.createEl("button", { text: side === "front" ? "Front" : "Back" });
-			if (side === this.previewSide) tab.addClass("mod-cta");
+			const active = side === this.previewSide;
+			const tab = tabs.createEl("button", { text: side === "front" ? "Front" : "Back", attr: { "aria-pressed": String(active) } });
+			if (active) tab.addClass("is-active");
 			tab.addEventListener("click", () => {
 				this.previewSide = side;
 				this.renderDetail();
@@ -170,14 +182,14 @@ export class BrowseScreen implements Screen {
 		}
 
 		const preview = detail.createDiv({ cls: "fc-browse-preview" });
-		const rendered = this.previewSide === "front" ? renderFront(ref) : renderBack(ref);
+		const rendered = this.previewSide === "front" ? renderFront(ref, this.ctx.settings) : renderBack(ref, "", this.ctx.settings);
 		this.frame = new CardFrame(preview, {
 			onSound: (index) => {
 				const name = rendered.sounds[index];
 				if (name) this.ctx.audio.play(soundUrls(this.ctx.repository, ref, [name]));
 			},
 		});
-		presentSide(this.frame, this.ctx.repository, ref, rendered, {
+		void presentSide(this.frame, this.ctx.media, ref, rendered, {
 			followTheme: this.ctx.settings.followObsidianTheme,
 			runDeckScripts: this.ctx.settings.runDeckScripts,
 		});
@@ -198,7 +210,7 @@ export class BrowseScreen implements Screen {
 		add("Card", `${ref.noteType.name} · ${ref.template.name}`);
 		add("State", suspended ? "Suspended" : STATE_NAMES[memory?.state ?? CardState.New]);
 		if (memory) {
-			add("Due", new Date(memory.due).toLocaleString());
+			add("Due", `${new Date(memory.due).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })} (${this.dueText(ref)})`);
 			add("Interval", memory.scheduledDays > 0 ? `${memory.scheduledDays} days` : "–");
 			add("Reviews", `${memory.reps} (${memory.lapses} lapses)`);
 			add("Stability", `${memory.stability.toFixed(1)} days`);

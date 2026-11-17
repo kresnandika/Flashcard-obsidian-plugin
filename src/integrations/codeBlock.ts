@@ -1,5 +1,5 @@
 import type { FlashcardsApi } from "./api";
-import { renderCounts } from "../ui/components/charts";
+import { renderCountSentence } from "../ui/components/charts";
 import { pluralize } from "../utils/strings";
 
 /**
@@ -16,25 +16,32 @@ export function renderCodeBlock(source: string, el: HTMLElement, api: Flashcards
 	const options = parseOptions(source);
 	const deck = options.deck ?? null;
 	const stats = api.stats(deck);
+	const due = stats.newCount + stats.learnCount + stats.reviewCount;
+	const { cards } = stats;
+	const learned = cards.young + cards.mature;
 
 	const box = el.createDiv({ cls: "fc-block" });
 	const head = box.createDiv({ cls: "fc-block-head" });
 	head.createDiv({ cls: "fc-block-title", text: options.title ?? (deck ? deck.split("::").pop() : "All decks") ?? "Flashcards" });
-	renderCounts(head, stats);
+	head.createDiv({ cls: "fc-block-scope", text: `${learned} of ${cards.total} learned` });
 
-	const { cards } = stats;
-	const learned = cards.young + cards.mature;
-	const bar = box.createDiv({ cls: "fc-block-progress", attr: { "aria-label": `${learned} of ${cards.total} learned` } });
-	const fill = bar.createDiv({ cls: "fc-block-progress-fill" });
-	fill.style.width = `${cards.total === 0 ? 0 : Math.round((learned / cards.total) * 100)}%`;
+	const body = box.createDiv({ cls: "fc-block-body" });
+	const figure = body.createDiv({ cls: "fc-today-figure" });
+	figure.createDiv({ cls: "fc-today-number", text: String(due) });
+	const text = figure.createDiv({ cls: "fc-today-text" });
+	text.createDiv({ cls: "fc-today-label", text: due === 1 ? "card due today" : "cards due today" });
+	renderCountSentence(text, stats);
 
-	box.createDiv({
-		cls: "fc-block-meta",
-		text: `${learned}/${cards.total} learned · ${cards.mature} mature · ${pluralize(stats.reviewsToday, "review")} today · ${pluralize(stats.streak, "day")} streak`,
-	});
-	const due = stats.newCount + stats.learnCount + stats.reviewCount;
-	const button = box.createEl("button", { cls: due > 0 ? "mod-cta" : "", text: due > 0 ? "Study now" : "Done for today" });
+	const button = body.createEl("button", { cls: due > 0 ? "mod-cta" : "", text: due > 0 ? "Study now" : "Done for today" });
 	button.addEventListener("click", () => api.study(deck));
+
+	const bar = box.createDiv({ cls: "fc-block-progress", attr: { role: "progressbar", "aria-label": `${learned} of ${cards.total} learned` } });
+	bar.createDiv({ cls: "fc-block-progress-fill" }).style.width = `${cards.total === 0 ? 0 : Math.round((learned / cards.total) * 100)}%`;
+
+	const facts = [`${pluralize(stats.reviewsToday, "review")} today`];
+	if (stats.streak > 0) facts.push(`${stats.streak}-day streak`);
+	if (cards.mature > 0) facts.push(`${cards.mature} mature`);
+	box.createDiv({ cls: "fc-block-meta", text: facts.join(" · ") });
 }
 
 export function parseOptions(source: string): Record<string, string> {

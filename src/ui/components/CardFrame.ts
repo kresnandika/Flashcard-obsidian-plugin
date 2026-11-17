@@ -32,6 +32,7 @@ export class CardFrame {
 	/** Values deck scripts stored in sessionStorage, carried from front to back. */
 	readonly storage: Record<string, string> = {};
 	private token = "";
+	private renderTicket = 0;
 	private readonly onMessage = (event: MessageEvent) => this.handleMessage(event);
 
 	constructor(
@@ -42,6 +43,15 @@ export class CardFrame {
 		this.iframe.setAttribute("sandbox", "allow-scripts");
 		this.iframe.setAttribute("title", "Flashcard");
 		window.addEventListener("message", this.onMessage);
+	}
+
+	/** Starts a render; a later call makes earlier, still-loading renders stale. */
+	beginRender(): number {
+		return ++this.renderTicket;
+	}
+
+	isCurrentRender(ticket: number): boolean {
+		return ticket === this.renderTicket;
 	}
 
 	/** Creates the per-document token the bridge script must echo back. */
